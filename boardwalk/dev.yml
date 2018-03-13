@@ -1,36 +1,6 @@
 version: '2'
 
 services:
-  dcc-metadata-indexer:
-    #image: quay.io/ucsc_cgl/metadata-indexer:2.0.0
-    build: dcc-metadata-indexer/v2
-    environment:
-      USER_GROUP: "${user_group}"
-      REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
-      ACCESS_TOKEN: "${redwood_access_token}"
-      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
-      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-      REDWOOD_SERVER: "${redwood_server}"
-      REDWOOD_ENDPOINT: "${redwood_server}"
-      ES_SERVICE: "${es_service}"
-      DATABASE_URL: "${database_url}"
-    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
-#    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job"
-    volumes:
-      - ~/dcc-metadata-indexer/es-jsonls:/app/dcc-metadata-indexer/es-jsonls
-      - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
-      - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
-      - ~/dcc-metadata-indexer/logs:/app/dcc-metadata-indexer/logs
-#      - /home/ubuntu/dcc-ops/boardwalk/dcc-metadata-indexer/test.py:/app/dcc-metadata-indexer/test.py
-    ports:
-      - "9200"
-    links:
-      - "${es_service}"
-      - boardwalk-billing
-    networks:
-      - esnet 
-      - billing
-    restart: always
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
@@ -83,19 +53,11 @@ services:
       - "80"
       - "443"
     volumes:
-      - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
       - ~/dcc-dashboard/logs:/app/log
 #      - dashboard1:/app
-    depends_on:
-      - dcc-metadata-indexer
     environment:
       GOOGLE_CLIENT_ID: "${google_client_id}"
       GOOGLE_CLIENT_SECRET: "${google_client_secret}"
-      REDWOOD_ADMIN: "${redwood_admin}"
-      REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
-      REDWOOD_SERVER: "auth.${redwood_server}"
-      REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
-      REDWOOD_HOST: "${redwood_server}"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"

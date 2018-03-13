@@ -1,25 +1,6 @@
 version: '2'
 
 services:
-  dcc-metadata-indexer:
-    image: quay.io/ucsc_cgl/metadata-indexer:2.0.7
-    environment:
-      USER_GROUP: "${user_group}"
-      REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
-      REDWOOD_SERVER: "${redwood_server}"
-      ES_SERVICE: "${es_service}"
-      DATABASE_URL: "${database_url}"
-    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
-    volumes:
-      - ~/dcc-metadata-indexer:/app/dcc-metadata-indexer/es-jsonls
-      - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
-      - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
-    ports:
-      - "9200"
-    links:
-      - elasticsearch1
-    networks:
-      - esnet 
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
