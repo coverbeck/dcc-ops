@@ -6,8 +6,6 @@ services:
       APACHE_PATH: "${apache_path}"
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
-      LUIGI_SERVER: "${luigi_server}"
-      LUIGI_PORT: "${luigi_port}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
@@ -17,9 +15,6 @@ services:
       AWS_PROFILE: "${aws_profile}"
       AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
       AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-      CONSONANCE_ADDRESS: "${consonance_address}"
-      CONSONANCE_TOKEN: "${consonance_token}"
-      CONSONANCE_ROOT: "place_holder"
       B_POSTGRES_PASSWORD: "${billing_password}"
       B_POSTGRES_USER: "${billing_user}"
       B_POSTGRES_DB: "${billing_db}"
@@ -34,16 +29,11 @@ services:
       - "80"
       - "443"
     networks:
-      - esnet
       - server
-      - action
-      - billing
       - login
     ports:
       - "9200"
     links:
-      - db
-      - boardwalk-billing
       - login-db
     restart: always
   dcc-dashboard:
@@ -58,11 +48,6 @@ services:
     environment:
       GOOGLE_CLIENT_ID: "${google_client_id}"
       GOOGLE_CLIENT_SECRET: "${google_client_secret}"
-      REDWOOD_ADMIN: "${redwood_admin}"
-      REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
-      REDWOOD_SERVER: "auth.${redwood_server}"
-      REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
-      REDWOOD_HOST: "${redwood_server}"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
@@ -80,13 +65,11 @@ services:
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "burndown"
     networks:
-      - esnet
       - server
       - login
       - bd
     links:
       - login-db
-      - bdchart-db
     restart: always
   nginx:
     build: nginx-image
@@ -121,65 +104,6 @@ services:
     volumes:
       - boardwalk1:/usr/src/app
     restart: always
-  elasticsearch1:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
-    container_name: "${es_service}"
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    mem_limit: 4g
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-       - 9200
-    networks:
-      - esnet
-    restart: always
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-      - "discovery.zen.ping.unicast.hosts=${es_service}"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    mem_limit: 4g
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - esdata2:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-    restart: always
-  db:
-    image: postgres:9.6-alpine
-    environment:
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_DB: "${postgres_db}"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - action
-    restart: always
   login-db:
     image: postgres:9.6-alpine
     container_name: "login-db"
@@ -192,47 +116,13 @@ services:
     networks:
       - login
     restart: always
-  boardwalk-billing:
-    image: postgres:9.6-alpine
-    container_name: "boardwalk-billing"
-    environment:
-      POSTGRES_PASSWORD: "${billing_password}"
-      POSTGRES_USER: "${billing_user}"
-      POSTGRES_DB: "${billing_db}"
-    volumes:
-      - billing_postgres:/var/lib/postgresql/data
-    ports:
-      - 5432
-    networks:
-      - billing
-    restart: always
-  bdchart-db:
-    image: postgres:9.6-alpine
-    container_name: "bd-chart"
-    environment:
-      POSTGRES_PASSWORD: "${login_password}"
-      POSTGRES_USER: "${login_user}"
-      POSTGRES_DB: "burndown"
-    volumes:
-      - bdchart_postgres:/var/lib/postgresql/data
-    ports:
-      - 5432
-    networks:
-      - bd
-    restart: always
 
 volumes:
-  esdata1:
-    driver: local
-  esdata2:
-    driver: local
   postgres:
     driver: local
   billing_postgres:
     driver: local
   login_postgres:
-    driver: local
-  bdchart_postgres:
     driver: local
   dashboard1:
     driver: local
@@ -241,15 +131,7 @@ volumes:
 networks:
   core_public:
     external: true
-  esnet:
-    external: true
   server:
     driver: bridge
-  action:
-    driver: bridge
   login:
-    driver: bridge
-  billing:
-    driver: bridge
-  bd:
     driver: bridge
