@@ -8,7 +8,6 @@
 # * we need a mechanism to shutdown since this script launches services in daemon mode
 
 set -e
-CONSONANCE_LAUNCHER_VERSION=feature/consonance_cleanup
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root" 1>&2
@@ -20,7 +19,7 @@ UCSC CLOUD COMMONS INSTALLATION BOOTSTRAPPER
 -----------------------------------------------------------------------------
 This tool will setup a single host which has all of the infrastructure we
 use to run the UCSC Cloud Commons reference implemenation used by the
-UCSC Genomics Institute.  See https://github.com/BD2KGenomics/dcc-ops
+UCSC Genomics Institute.  See https://github.com/DataBiosphere/dcc-ops
 
 This system requires the following:
 * Docker support in your Linux distribution (Ubuntu 16.04 is officially supported).
@@ -33,7 +32,7 @@ ETH_DEV env variable before running this script.
 
 For more information see:
 
-* the main GitHub page: https://github.com/BD2KGenomics/dcc-ops
+* the main GitHub page: https://github.com/DataBiosphere/dcc-ops
 * the UCSC Genomics Institute - Analysis Core: http://ucsc-cgl.org
 
 MSG
