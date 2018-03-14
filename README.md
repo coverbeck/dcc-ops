@@ -58,10 +58,6 @@ Make sure you do the following:
     * all TCP <- the elastic IP of the VM (Make sure you add /32 to the Elastic IP)
     * all TCP <- the security group itself
 
-### Setup for Consonance
-
-See the Consonance [README](consonance/README.md) for details.  Consonance assumes you have an SSH key created and uploaded to a location on your host VM.  Other than that, there are no additional pre-setup tasks.
-
 #### Adding private SSH key to your VM
 
 Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it. Then do `chmod 400 ~/.ssh/<your_key>.pem` so your key is not publicly viewable.
@@ -71,37 +67,9 @@ Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the sa
 * Guide on choosing AWS instance type... make sure it matches your AMI.
 * AMI, use an ubuntu 16.04 base box, you can use the official Ubuntu release.  You may need to make your own AMI with more storage! Needs to be in your region!  You may want to google to start with the official Ubuntu images for your region.
 
-#### Creating an AMI for Worker Node
-
-Follow the instructions [here](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html) to create an AMI for the worker node. Use an ubuntu 16.04 base box. You can use the official Ubuntu release. You may need to make your own AMI with more storage. Make sure you make it in the same region where your VM and S3 buckets are located.
-
-#### Consonance CLI on the Host VM
-
-You probably want to install the Consonance command line on the host VM so you can submit work from outside the Docker containers running the various Consonance services.  Likewise, you can install the CLI on other hosts and submit work to the queue.
-
-Download the `consonance` command line from the Consonance releases page:
-
-https://github.com/Consonance/consonance/releases
-
-For example:
-
-```
-wget https://github.com/Consonance/consonance/releases/download/2.0.0-alpha.15/consonance
-sudo mv consonance /usr/local/bin/
-sudo chmod a+x /usr/local/bin/consonance
-# running the command will install the tool and prompt you to enter your token, please get the token after running install_bootstrap
-consonance
-```
-
-Follow the interactive directions for setting up this CLI.  You will need the elastic IP you setup previously (or, better yet, the "base domain" from above).
-
 ### Setup for Boardwalk
 
 Here is a summary of what you need to do. See the Boardwalk [README](boardwalk/README.md) for details.
-
-#### Changing the maximum virtual memory in your VM
-
-ElasticSearch requires that you set `vm.max_map_count` to at least _262144_. The bootstrap installer will take care of this. However, the changes are not permanent, and if you restart your VM, `vm.max_map_count` will change to its default. To make this change permanent, edit the file `/etc/sysctl.conf` on your VM and add/edit this line: `vm.max_map_count=262144`. This will make the change permanent even in the case the VM is restarted.
 
 #### Create a Google Oauth2 app
 
