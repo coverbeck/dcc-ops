@@ -70,6 +70,5 @@ boardwalk_dcc-dashboard-service_1
 boardwalk_dcc-dashboard_1
 boardwalk_nginx_1
 boardwalk_boardwalk_1
-elasticsearch1
 boardwalk_db_1
 ```

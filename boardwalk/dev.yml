@@ -6,20 +6,12 @@ services:
       APACHE_PATH: "${apache_path}"
       ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
-      LUIGI_SERVER: "${luigi_server}"
-      LUIGI_PORT: "${luigi_port}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
       POSTGRES_USER: "${postgres_user}"
       POSTGRES_PASSWORD: "${postgres_password}"
       POSTGRES_DB: "${postgres_db}"
-      AWS_PROFILE: "${aws_profile}"
-      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
-      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-      CONSONANCE_ADDRESS: "${consonance_address}"
-      CONSONANCE_TOKEN: "${consonance_token}"
-      CONSONANCE_ROOT: "place_holder"
       B_POSTGRES_PASSWORD: "${billing_password}"
       B_POSTGRES_USER: "${billing_user}"
       B_POSTGRES_DB: "${billing_db}"
@@ -34,16 +26,11 @@ services:
       - "80"
       - "443"
     networks:
-      - esnet
       - server
-      - action
-      - billing
       - login
     ports:
       - "9200"
     links:
-      - db
-      - boardwalk-billing
       - login-db
     restart: always
   dcc-dashboard:
@@ -75,13 +62,10 @@ services:
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "burndown"
     networks:
-      - esnet
       - server
       - login
-      - bd
     links:
       - login-db
-      - bdchart-db
     restart: always
   nginx:
     build: nginx-dev
@@ -117,17 +101,6 @@ services:
     volumes:
       - boardwalk1:/usr/src/app
     restart: always
-  db:
-    image: postgres:9.6-alpine
-    environment:
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_DB: "${postgres_db}"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - action
-    restart: always
   login-db:
     image: postgres:9.6-alpine
     container_name: "login-db"
@@ -140,47 +113,9 @@ services:
     networks:
       - login
     restart: always
-  boardwalk-billing:
-    image: postgres:9.6-alpine
-    container_name: "boardwalk-billing"
-    environment:
-      POSTGRES_PASSWORD: "${billing_password}"
-      POSTGRES_USER: "${billing_user}"
-      POSTGRES_DB: "${billing_db}"
-    volumes:
-      - billing_postgres:/var/lib/postgresql/data
-    ports:
-      - 5432
-    networks:
-      - billing
-    restart: always
-  bdchart-db:
-    image: postgres:9.6-alpine
-    container_name: "bd-chart"
-    environment:
-      POSTGRES_PASSWORD: "${login_password}"
-      POSTGRES_USER: "${login_user}"
-      POSTGRES_DB: "burndown"
-    volumes:
-      - bdchart_postgres:/var/lib/postgresql/data
-    ports:
-      - 5432
-    networks:
-      - bd
-    restart: always
 
 volumes:
-  esdata1:
-    driver: local
-  esdata2:
-    driver: local
-  postgres:
-    driver: local
-  billing_postgres:
-    driver: local
   login_postgres:
-    driver: local
-  bdchart_postgres:
     driver: local
   dashboard1:
     driver: local
@@ -189,15 +124,7 @@ volumes:
 networks:
   core_public:
     external: true
-  esnet:
-    external: true
   server:
     driver: bridge
-  action:
-    driver: bridge
   login:
-    driver: bridge
-  billing:
-    driver: bridge
-  bd:
     driver: bridge

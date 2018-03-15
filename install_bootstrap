@@ -207,10 +207,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
     read run_boardwalk
 
     if [ "${run_boardwalk^^}" = 'Y' ] ; then
-      #Per ES specifications to run their docker image on production:
-      #Set vm.max_map_count to 262144
-      #Set the default elasticsearch1 service name
-      es_service=elasticsearch1
+
       dcc_dashboard_protocol=https
       dcc_dashboard_port=8080
 
@@ -245,36 +242,17 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 #            read -ep $'What is the email address for notification? \n' email_address
 #      fi
 
+      dcc_dashboard_host='dcc_dashboard_host'
+      ask_question "What is the hostname of dcc-dashboard?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
+        
+      es_service='es_service'
+      ask_question "What is the elasticsearch base url, e.g., https://example.com?" "$ES_SERVICE" "Elasticsearch base url" $es_service
+
       google_client_id='google_client_id'
       ask_question "What is your Google Client ID?" "$GOOGLE_CLIENT_ID" "Google Client ID" $google_client_id
 
       google_client_secret='google_client_secret'
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
-
-      # redwood auth-server admin user - most probably always 'admin'
-      # EDIT: The login function requires the mgmt user. admin wouldn't work.
-      redwood_admin='mgmt'
-      #ask_question "What is your Redwood auth-server admin username?" "$REDWOOD_ADMIN" "Redwood Admin" $redwood_admin
-
-      # redwood auth-server admin password - peek at redwood/.env
-      redwood_admin_password=$(cat redwood/.env | grep 'mgmt_client_secret=' | sed 's/[^=]*=//')
-      #ask_question "What is your Redwood auth-server admin user password?" "$REDWOOD_ADMIN_PASSWORD" "Redwood Admin Password" $redwood_admin_password
-
-      # redwood endpoint - peek at redwood/.env
-      redwood_server=$(cat redwood/.env | grep 'base_url=' | sed 's/[^=]*=//')
-      #ask_question "What is your Redwood endpoint?" "$REDWOOD_SERVER" "Redwood Server" $redwood_server
-
-      # not really relevant anymore; always 443 (but have to use auth-server vhost)
-      redwood_admin_port='443'
-      #ask_question "What is your Redwood auth-server Admin Port?" "$REDWOOD_ADMIN_PORT" "Redwood Admin Port" $redwood_admin_port
-
-      # generate redwood access token
-      redwood_access_token=$(sudo redwood/cli/bin/redwood token create -u indexer -s 'aws.upload aws.download')
-      #ask_question "What is your Redwood Access Token?" "$REDWOOD_ACCESS_TOKEN" "Redwood Access Token" $redwood_access_token
-
-      #dcc_dashboard_host='dcc_dashboard_host'
-      #ask_question "What is your DCC Dashboard Host (base URL)?" "$DCC_DASHBOARD_HOST" "DCC Dashboard Host" $dcc_dashboard_host
-      dcc_dashboard_host=$redwood_server
 
 #      dcc_dashboard_port='dcc_dashboard_port'
 #      ask_question "What is your DCC Dashboard Port?" "$DCC_DASHBOARD_PORT" "DCC Dashboard Port" $dcc_dashboard_port

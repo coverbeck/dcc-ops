@@ -13,8 +13,6 @@ The system has components fulfilling a range of functions, all of which are open
 These components are setup with the install process available in this repository:
 
 * [Boardwalk](boardwalk/README.md): our file browsing portal on top of Redwood
-* [Consonance](consonance/README.md): our multi-cloud workflow orchestration system
-* [Action Service](action/README.md): a Python-based toolkit for automating workflow execution
 
 These are related projects that are either already setup and available for use on the web or are used by components above.
 
@@ -118,17 +116,6 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * On question `What is the AWS profile?`, your AWS username
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
-* Action
-  * On the question `What is the Consonance access token?` enter your Consonance access token
-  * On the question `What is the AWS Access key ID?`, your AWS key used for storage system
-  * On the question `What is the AWS secret access key?`, your AWS secret key used for the storage system
-  * On the question `What is the AWS profile?`, your AWS username
-  * On the question `What is the AWS region?`, your AWS region
-  * On the question `What is your Redwood endpoint?`, enter the endpoint for the storage system, e.g. `myurl.com`. Referred to as `base URL` above
-  * On the question `What is your Redwood Access Token?`, enter your storage system access token
-  * On the question `What is your Elastic Search endpoint?`, enter your Elastic Search endpoint, e.g. `elasticsearch1`
-  * On the question `What is your Elastic Search endpoint port?`, enter the port number, e.g. `9200`
-  * On the question `What is your AWS S3 touch file bucket?`, enter the name of the AWS bucket where touch files will be written
   
   
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
@@ -156,55 +143,6 @@ Here are things we need to explain how to do post install:
 
 To test that everything installed successfully, you can run `cd test && ./integration.sh`. This will do an upload and download with core-client and check the results.
 
-#### Run Consonance 
-
-Make sure you have the consonance CLI installed.
-
-Make a `run.json`
-
-```
-{
-  "input_file": {
-        "class": "File",
-        "path": "https://raw.githubusercontent.com/briandoconnor/dockstore-tool-md5sum/master/md5sum.input"
-    }
-}
-```
-
-    consonance run --tool-dockstore-id quay.io/briandoconnor/dockstore-tool-md5sum:1.0.3 --flavour r3.8xlarge --run-descriptor run.json
-    # and it produces this
-    "job_uuid" : "66a67327-ccd3-4af0-a5c8-688fb52da778"
-    
-    # you can check the status
-    consonance status --job_uuid 66a67327-ccd3-4af0-a5c8-688fb52da778
-
-
-### Upload and Download
-
-End users should be directed to use the [quay.io/ucsc_cgl/core-client](https://quay.io/repository/ucsc_cgl/core-client)
-docker image as documented in its [README](https://github.com/BD2KGenomics/dcc-spinnaker-client/blob/develop/README.md).
-The `test/integration.sh` file also demonstrates normal core-client usage.
-
-Here is a sample command you can run from the `test` folder to do an upload:
-
-**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/cli/bin/redwood token create -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. End users should only be given project-specific scopes like _aws.PROJECT.upload_.
-
-```
-sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
-            -v $(pwd)/manifest.tsv:/dcc/manifest.tsv -v $(pwd)/samples:/samples \
-            -v $(pwd)/outputs:/outputs quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload \
-            --force-upload /dcc/manifest.tsv
-```
-Here is a sample command you can run to download the using a manifest file. On the dashboard, go to the "BROWSER" tab, and click on "Download Manifest" at the bottom of the list. Save this file, and run the following command. This will download the files specified from the manifest:
-
-```
-sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
-            -v $(pwd)/<your_manifest_file_name.tsv>:/dcc/dcc-spinnaker-client/data/manifest.tsv \
-            -v $(pwd)/samples:/samples -v $(pwd)/outputs:/outputs \
-            -v $(pwd):/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha \
-            redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
-```
-
 ### Running RNA-Seq Analysis on Sample Data
 
 To do RNA-Seq Analysis, you must first upload reference files to Redwood. You can obtain the reference files by running from within dcc-ops:
@@ -227,7 +165,5 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 
 ### To Do
 
-* should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
-* the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
-* "What is the AWS profile?" -> you don't need this, get rid of it
+* the bootstrapper should install Java, Dockstore CLI
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does

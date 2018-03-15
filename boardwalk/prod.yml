@@ -52,7 +52,6 @@ services:
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
       DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
-      DCC_ACTION_SERVICE: "${dcc_action_service}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
@@ -67,7 +66,6 @@ services:
     networks:
       - server
       - login
-      - bd
     links:
       - login-db
     restart: always
@@ -119,8 +117,6 @@ services:
 
 volumes:
   postgres:
-    driver: local
-  billing_postgres:
     driver: local
   login_postgres:
     driver: local
