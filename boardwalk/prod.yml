@@ -9,18 +9,12 @@ services:
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_DB: "${postgres_db}"
-      AWS_PROFILE: "${aws_profile}"
-      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
-      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-      B_POSTGRES_PASSWORD: "${billing_password}"
-      B_POSTGRES_USER: "${billing_user}"
-      B_POSTGRES_DB: "${billing_db}"
       FLASK_APP: "/app/mapi.py"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       SECRET_KEY: "${secret_key}"
+      ES_DOMAIN: "${es_domain}"
+      ES_PORT: "${es_port}"
+      ES_PROTOCOL: "${es_protocol}"
     image: quay.io/ucsc_cgl/dashboard-service:1.0.9
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
@@ -51,7 +45,6 @@ services:
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
-      DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
@@ -60,6 +53,9 @@ services:
       SERVER_NAME: "${dcc_dashboard_host}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
       ES_SERVICE: "${es_service}"
+      ES_SERVICE: "${es_service}"
+      ES_DOMAIN: "${es_domain}"
+      ES_PORT: "${es_port}"
       BD_POSTGRES_USER: "${login_user}"
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "burndown"
@@ -93,6 +89,8 @@ services:
     image: quay.io/ucsc_cgl/boardwalk:1.0.0
     environment:
       - BOARDWALK_HOST=${dcc_dashboard_host}
+      - BW_DATA_URL=${dcc_dashboard_protocol}://${dcc_dashboard_host}
+      - BEARER_TOKEN=${login_token}
     networks:
       - server
     ports:

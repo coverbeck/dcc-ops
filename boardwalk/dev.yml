@@ -4,20 +4,16 @@ services:
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
-      ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
+      FLASK_APP: "/app/mapi.py"
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_DB: "${postgres_db}"
-      B_POSTGRES_PASSWORD: "${billing_password}"
-      B_POSTGRES_USER: "${billing_user}"
-      B_POSTGRES_DB: "${billing_db}"
-      FLASK_APP: "/app/mapi.py"
-      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       SECRET_KEY: "${secret_key}"
+      ES_DOMAIN: "${es_domain}"
+      ES_PORT: "${es_port}"
+      ES_PROTOCOL: "${es_protocol}"
     #image: quay.io/ucsc_cgl/dashboard-service:1.0.0
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
@@ -48,8 +44,6 @@ services:
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
-      DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
-      DCC_ACTION_SERVICE: "${dcc_action_service}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
@@ -57,7 +51,9 @@ services:
       LOG_IN_TOKEN: "${login_token}"
       SERVER_NAME: "${dcc_dashboard_host}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
-      ES_SERVICE: "${es_service}"
+      ES_DOMAIN: "${es_domain}"
+      ES_PORT: "${es_port}"
+      ES_PROTOCOL: "${es_protocol}"
       BD_POSTGRES_USER: "${login_user}"
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "burndown"
@@ -88,10 +84,12 @@ services:
       - server
     restart: always
   boardwalk:
-    image: quay.io/ucsc_cgl/boardwalk:1.0.0
-    #build: boardwalk
+    #image: quay.io/ucsc_cgl/boardwalk:1.0.0
+    build: boardwalk
     environment:
       - BOARDWALK_HOST=${dcc_dashboard_host}
+      - BW_DATA_URL=${dcc_dashboard_protocol}://${dcc_dashboard_host}
+      - BEARER_TOKEN=${login_token}
     networks:
       - server
     ports:
