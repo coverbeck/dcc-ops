@@ -12,11 +12,7 @@ The system has components fulfilling a range of functions, all of which are open
 
 These components are setup with the install process available in this repository:
 
-* [Spinnaker](spinnaker/README.md): our data submission and validation system
-* [Redwood](redwood/README.md): our cloud data storage and indexer based on the ICGC Cloud Storage system
 * [Boardwalk](boardwalk/README.md): our file browsing portal on top of Redwood
-* [Consonance](consonance/README.md): our multi-cloud workflow orchestration system
-* [Action Service](action/README.md): a Python-based toolkit for automating workflow execution
 
 These are related projects that are either already setup and available for use on the web or are used by components above.
 
@@ -60,30 +56,6 @@ Make sure you do the following:
     * all TCP <- the elastic IP of the VM (Make sure you add /32 to the Elastic IP)
     * all TCP <- the security group itself
 
-### Setup for Redwood
-
-Here is a summary of what you need to do. See the Redwood [README](redwood/README.md) for details.
-
-#### Re-route Service Endpoints
-Redwood exposes storage, metadata, auth services. Each of these should be made subdomains of your "base domain".
-* Make sure you have a domain name associated with your Elastic IP ('example.com')
-* Have the subdomains 'auth', 'metadata', and 'storage' point to the same Elastic IP ('auth.example.com', 'metadata.example.com', and 'storage.example.com' and 'example.com' all resolve to the same Elastic IP)
-
-#### Make your S3 Bucket
-* On the AWS console, go to S3 and create 3 buckets: one for redwood-storage, one for redwood-backups, and one for the action service.
-* Assign them a unique name. Keep note of the name given to each of them.
-* Get the S3 endpoint. It dependent on your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) for the list.
-
-#### Create an AWS IAM Encryption Key
-* Go [here](http://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and follow the instruction for making an AWS IAM Encryption key. Make sure you create it in same region where you created your VM!
-* Take note of the AWS IAM Encryption Key ID. You can find it in the AWS console > Services > IAM > Encryption Keys > [your key's details page] > ARN. It is the last part of the ARN (e.g. *arn:aws:kms:us-east-1:862902209576:key/* **0aaad33b-7ead-44be-a56e-3d00c8777042**
-
-Now we're ready to install Redwood.
-
-### Setup for Consonance
-
-See the Consonance [README](consonance/README.md) for details.  Consonance assumes you have an SSH key created and uploaded to a location on your host VM.  Other than that, there are no additional pre-setup tasks.
-
 #### Adding private SSH key to your VM
 
 Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the same key that you use to SSH to your host VM, regardless it needs to be a key created on the AWS console so Amazon is aware of it. Then do `chmod 400 ~/.ssh/<your_key>.pem` so your key is not publicly viewable.
@@ -91,39 +63,11 @@ Add your private ssh key under `~/.ssh/<your_key>.pem`, this is typically the sa
 #### TODO:
 
 * Guide on choosing AWS instance type... make sure it matches your AMI.
-* AMI, use an ubuntu 14.04 base box, you can use the official Ubuntu release.  You may need to make your own AMI with more storage! Needs to be in your region!  You may want to google to start with the official Ubuntu images for your region.
-
-#### Creating an AMI for Worker Node
-
-Follow the instructions [here](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html) to create an AMI for the worker node. Use an ubuntu 14.04 base box. You can use the official Ubuntu release. You may need to make your own AMI with more storage. Make sure you make it in the same region where your VM and S3 buckets are located.
-
-#### Consonance CLI on the Host VM
-
-You probably want to install the Consonance command line on the host VM so you can submit work from outside the Docker containers running the various Consonance services.  Likewise, you can install the CLI on other hosts and submit work to the queue.
-
-Download the `consonance` command line from the Consonance releases page:
-
-https://github.com/Consonance/consonance/releases
-
-For example:
-
-```
-wget https://github.com/Consonance/consonance/releases/download/2.0.0-alpha.15/consonance
-sudo mv consonance /usr/local/bin/
-sudo chmod a+x /usr/local/bin/consonance
-# running the command will install the tool and prompt you to enter your token, please get the token after running install_bootstrap
-consonance
-```
-
-Follow the interactive directions for setting up this CLI.  You will need the elastic IP you setup previously (or, better yet, the "base domain" from above).
+* AMI, use an ubuntu 16.04 base box, you can use the official Ubuntu release.  You may need to make your own AMI with more storage! Needs to be in your region!  You may want to google to start with the official Ubuntu images for your region.
 
 ### Setup for Boardwalk
 
 Here is a summary of what you need to do. See the Boardwalk [README](boardwalk/README.md) for details.
-
-#### Changing the maximum virtual memory in your VM
-
-ElasticSearch requires that you set `vm.max_map_count` to at least _262144_. The bootstrap installer will take care of this. However, the changes are not permanent, and if you restart your VM, `vm.max_map_count` will change to its default. To make this change permanent, edit the file `/etc/sysctl.conf` on your VM and add/edit this line: `vm.max_map_count=262144`. This will make the change permanent even in the case the VM is restarted.
 
 #### Create a Google Oauth2 app
 
@@ -165,14 +109,6 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * For question "What is your AWS zone within the selected region (e.g. us-east-1c for the us-east-1 region)?", you can check your AWS zone by clicking on your instance, and then under _Description_, look for _Availability zone_.
   * For question "What is your AWS instance type (e.g. m1.xlarge)?", type the type of instance you want consonance to spawn up. You can check the types of instances [here](http://www.ec2instances.info/) (use the entry under the _API Name_ column). For now, only use `c4.8xlarge`. Support for more instances will come in the future.  
   * For question "What is your AWS image ..." use the _AMI ID_ created during the _Consonance Setup_ section.
-* Redwood
-  * Install in prod mode
-  * If the base URL is _example.com_, then _storage.example.com_, _metadata.example.com_, _auth.example.com_, and _example.com_ should resolve via DNS to your server elastic IP.
-  * Enter your AWS Key and Secret Key when requested. Redwood will use these to sign requests for upload and download to your S3 bucket
-  * On question 'What is your AWS S3 bucket?', put the name of the s3 bucket you created for Redwood.
-  * On question 'What is your AWS S3 endpoint?', put the S3 endpoint pertaining to your region. See [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region).
-  * On question 'What is your AWS IAM KMS key ID?', put your encryption key ID (See 'Create an AWS IAM Encryption Key" above). If you don't want server-side encryption, you can leave this blank.
-  * On question 'Would you like to use external redwood databases?', enter 'N'.
 * Boardwalk
   * Install in prod mode
   * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
@@ -180,17 +116,6 @@ The `install_bootstrap` script will ask you to configure each service interactiv
   * On question `What is the AWS profile?`, your AWS username
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
-* Action
-  * On the question `What is the Consonance access token?` enter your Consonance access token
-  * On the question `What is the AWS Access key ID?`, your AWS key used for storage system
-  * On the question `What is the AWS secret access key?`, your AWS secret key used for the storage system
-  * On the question `What is the AWS profile?`, your AWS username
-  * On the question `What is the AWS region?`, your AWS region
-  * On the question `What is your Redwood endpoint?`, enter the endpoint for the storage system, e.g. `myurl.com`. Referred to as `base URL` above
-  * On the question `What is your Redwood Access Token?`, enter your storage system access token
-  * On the question `What is your Elastic Search endpoint?`, enter your Elastic Search endpoint, e.g. `elasticsearch1`
-  * On the question `What is your Elastic Search endpoint port?`, enter the port number, e.g. `9200`
-  * On the question `What is your AWS S3 touch file bucket?`, enter the name of the AWS bucket where touch files will be written
   
   
 Once the installer completes, the system should be up and running. Congratulations! See `docker ps` to get an idea of what's running.
@@ -202,18 +127,10 @@ Once the installer completes, the system should be up and running. Congratulatio
 Here are things we need to explain how to do post install:
 
 * first of all, how to go to the website and confirm things are working e.g. https://ops-dev.ucsc-cgl.org or whatever the domain name is
-* how to associate a token with a user email so token download works
-    * `sudo redwood/cli/bin/redwood token create -u email@ucsc.edu -s 'aws.upload aws.download'`, this give access to all programs.
-    * you can also assign program scopes as well, for example
-        * `sudo redwood/cli/bin/redwood project create PROJECT`
-        * `sudo redwood/cli/bin/redwood token create -u email@ucsc.edu -s 'aws.PROJECT.upload aws.PROJECT.download'`
 * user log in via google, retrieve token
 * Get the reference data used by the RNASeq-CGL pipeline:
 *    Instructions for downloading reference data for RNASeq-CGL are located here: https://github.com/BD2KGenomics/toil-rnaseq/wiki/Pipeline-Inputs 
 * Test data inputs for the RNASeq-CGL pipeline are locate here: https://github.com/UCSC-Treehouse/pipelines/tree/master/samples 
-* upload reference data for RNASeq-CGL to the storage system
-    * see `test/rnaseq-cgl-refdata`
-    * e.g. `sudo docker run --rm -it -e ACCESS_TOKEN=`cat token.txt` -e REDWOOD_ENDPOINT=ops-dev.ucsc-cgl.org -v $(pwd)/outputs:/outputs -v `pwd`:/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload --force-upload --skip-submit  /dcc/data/manifest.tsv`
 * update the decider manually to point to these new reference URLs (via exec into the Docker container)
 * get sample fastq data
     * ...
@@ -225,55 +142,6 @@ Here are things we need to explain how to do post install:
 ### Confirm Proper Function
 
 To test that everything installed successfully, you can run `cd test && ./integration.sh`. This will do an upload and download with core-client and check the results.
-
-#### Run Consonance 
-
-Make sure you have the consonance CLI installed.
-
-Make a `run.json`
-
-```
-{
-  "input_file": {
-        "class": "File",
-        "path": "https://raw.githubusercontent.com/briandoconnor/dockstore-tool-md5sum/master/md5sum.input"
-    }
-}
-```
-
-    consonance run --tool-dockstore-id quay.io/briandoconnor/dockstore-tool-md5sum:1.0.3 --flavour r3.8xlarge --run-descriptor run.json
-    # and it produces this
-    "job_uuid" : "66a67327-ccd3-4af0-a5c8-688fb52da778"
-    
-    # you can check the status
-    consonance status --job_uuid 66a67327-ccd3-4af0-a5c8-688fb52da778
-
-
-### Upload and Download
-
-End users should be directed to use the [quay.io/ucsc_cgl/core-client](https://quay.io/repository/ucsc_cgl/core-client)
-docker image as documented in its [README](https://github.com/BD2KGenomics/dcc-spinnaker-client/blob/develop/README.md).
-The `test/integration.sh` file also demonstrates normal core-client usage.
-
-Here is a sample command you can run from the `test` folder to do an upload:
-
-**NOTE:** Make sure you create an access token for yourself first. You can do so by running within `dcc-ops` the command `redwood/cli/bin/redwood token create -u myemail@ucsc.edu -s 'aws.upload aws.download'`. This will create a global token that you can use for testing for upload and download on any project. End users should only be given project-specific scopes like _aws.PROJECT.upload_.
-
-```
-sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
-            -v $(pwd)/manifest.tsv:/dcc/manifest.tsv -v $(pwd)/samples:/samples \
-            -v $(pwd)/outputs:/outputs quay.io/ucsc_cgl/core-client:1.1.0-alpha spinnaker-upload \
-            --force-upload /dcc/manifest.tsv
-```
-Here is a sample command you can run to download the using a manifest file. On the dashboard, go to the "BROWSER" tab, and click on "Download Manifest" at the bottom of the list. Save this file, and run the following command. This will download the files specified from the manifest:
-
-```
-sudo docker run --rm -it -e ACCESS_TOKEN=<your_token> -e REDWOOD_ENDPOINT=<your_url.com> \
-            -v $(pwd)/<your_manifest_file_name.tsv>:/dcc/dcc-spinnaker-client/data/manifest.tsv \
-            -v $(pwd)/samples:/samples -v $(pwd)/outputs:/outputs \
-            -v $(pwd):/dcc/data quay.io/ucsc_cgl/core-client:1.1.0-alpha \
-            redwood-download /dcc/dcc-spinnaker-client/data/manifest.tsv /dcc/data/
-```
 
 ### Running RNA-Seq Analysis on Sample Data
 
@@ -297,7 +165,5 @@ If something goes wrong, you can [open an issue](https://github.com/BD2KGenomics
 
 ### To Do
 
-* should use a reference rather than checkin the consonance directory, that ends up creating duplication which is not desirable
-* the bootstrapper should install Java, Dockstore CLI, and the Consonance CLI
-* "What is the AWS profile?" -> you don't need this, get rid of it
+* the bootstrapper should install Java, Dockstore CLI
 * Consonance config.template includes hard-coded Consonance token, needs to be generated and written to .env file just like Beni does

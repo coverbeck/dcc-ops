@@ -1,61 +1,19 @@
 version: '2'
 
 services:
-  dcc-metadata-indexer:
-    #image: quay.io/ucsc_cgl/metadata-indexer:2.0.0
-    build: dcc-metadata-indexer/v2
-    environment:
-      USER_GROUP: "${user_group}"
-      REDWOOD_ACCESS_TOKEN: "${redwood_access_token}"
-      ACCESS_TOKEN: "${redwood_access_token}"
-      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
-      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-      REDWOOD_SERVER: "${redwood_server}"
-      REDWOOD_ENDPOINT: "${redwood_server}"
-      ES_SERVICE: "${es_service}"
-      DATABASE_URL: "${database_url}"
-    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --skip-program TEST --skip-project TEST --es-service ${es_service} --cron-job" 
-#    command: "--storage-access-token ${redwood_access_token} --server-host ${redwood_server} --skip-uuid-directory /app/dcc-metadata-indexer/redacted --es-service ${es_service} --cron-job"
-    volumes:
-      - ~/dcc-metadata-indexer/es-jsonls:/app/dcc-metadata-indexer/es-jsonls
-      - ~/dcc-metadata-indexer/endpoint_metadata:/app/dcc-metadata-indexer/endpoint_metadata
-      - ~/dcc-metadata-indexer/redacted:/app/dcc-metadata-indexer/redacted
-      - ~/dcc-metadata-indexer/logs:/app/dcc-metadata-indexer/logs
-#      - /home/ubuntu/dcc-ops/boardwalk/dcc-metadata-indexer/test.py:/app/dcc-metadata-indexer/test.py
-    ports:
-      - "9200"
-    links:
-      - "${es_service}"
-      - boardwalk-billing
-    networks:
-      - esnet 
-      - billing
-    restart: always
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
-      ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
-      LUIGI_SERVER: "${luigi_server}"
-      LUIGI_PORT: "${luigi_port}"
+      FLASK_APP: "/app/mapi.py"
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_DB: "${postgres_db}"
-      AWS_PROFILE: "${aws_profile}"
-      AWS_ACCESS_KEY_ID: "${aws_access_key_id}"
-      AWS_SECRET_ACCESS_KEY: "${aws_secret_access_key}"
-      CONSONANCE_ADDRESS: "${consonance_address}"
-      CONSONANCE_TOKEN: "${consonance_token}"
-      CONSONANCE_ROOT: "place_holder"
-      B_POSTGRES_PASSWORD: "${billing_password}"
-      B_POSTGRES_USER: "${billing_user}"
-      B_POSTGRES_DB: "${billing_db}"
-      FLASK_APP: "/app/mapi.py"
-      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       SECRET_KEY: "${secret_key}"
+      ES_DOMAIN: "${es_domain}"
+      ES_PORT: "${es_port}"
+      ES_PROTOCOL: "${es_protocol}"
     #image: quay.io/ucsc_cgl/dashboard-service:1.0.0
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
@@ -64,16 +22,11 @@ services:
       - "80"
       - "443"
     networks:
-      - esnet
       - server
-      - action
-      - billing
       - login
     ports:
       - "9200"
     links:
-      - db
-      - boardwalk-billing
       - login-db
     restart: always
   dcc-dashboard:
@@ -83,24 +36,14 @@ services:
       - "80"
       - "443"
     volumes:
-      - ~/dcc-metadata-indexer/es-jsonls:/app/static/zip
       - ~/dcc-dashboard/logs:/app/log
 #      - dashboard1:/app
-    depends_on:
-      - dcc-metadata-indexer
     environment:
       GOOGLE_CLIENT_ID: "${google_client_id}"
       GOOGLE_CLIENT_SECRET: "${google_client_secret}"
-      REDWOOD_ADMIN: "${redwood_admin}"
-      REDWOOD_ADMIN_PASSWORD: "${redwood_admin_password}"
-      REDWOOD_SERVER: "auth.${redwood_server}"
-      REDWOOD_ADMIN_PORT: "${redwood_admin_port}"
-      REDWOOD_HOST: "${redwood_server}"
       DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       DCC_DASHBOARD_PROTOCOL: "${dcc_dashboard_protocol}"
       DCC_DASHBOARD_SERVICE: "${dcc_dashboard_service}"
-      DCC_INVOICING_SERVICE: "${dcc_invoicing_service}"
-      DCC_ACTION_SERVICE: "${dcc_action_service}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
@@ -108,18 +51,17 @@ services:
       LOG_IN_TOKEN: "${login_token}"
       SERVER_NAME: "${dcc_dashboard_host}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
-      ES_SERVICE: "${es_service}"
+      ES_DOMAIN: "${es_domain}"
+      ES_PORT: "${es_port}"
+      ES_PROTOCOL: "${es_protocol}"
       BD_POSTGRES_USER: "${login_user}"
       BD_POSTGRES_PASSWORD: "${login_password}"
       BD_POSTGRES_DB: "burndown"
     networks:
-      - esnet
       - server
       - login
-      - bd
     links:
       - login-db
-      - bdchart-db
     restart: always
   nginx:
     build: nginx-dev
@@ -142,10 +84,12 @@ services:
       - server
     restart: always
   boardwalk:
-    image: quay.io/ucsc_cgl/boardwalk:1.0.0
-    #build: boardwalk
+    #image: quay.io/ucsc_cgl/boardwalk:1.0.0
+    build: boardwalk
     environment:
       - BOARDWALK_HOST=${dcc_dashboard_host}
+      - BW_DATA_URL=${dcc_dashboard_protocol}://${dcc_dashboard_host}
+      - BEARER_TOKEN=${login_token}
     networks:
       - server
     ports:
@@ -154,81 +98,6 @@ services:
       - "3000"
     volumes:
       - boardwalk1:/usr/src/app
-    restart: always
-  elasticsearch1:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
-    container_name: "${es_service}"
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    mem_limit: 4g
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-       - 9200
-    networks:
-      - esnet
-    restart: always
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.2.2
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-      - "discovery.zen.ping.unicast.hosts=${es_service}"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    mem_limit: 4g
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - esdata2:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-    restart: always
-  kibana:
-    container_name: "kibana"
-    image: docker.elastic.co/kibana/kibana:5.2.2
-    environment:
-      SERVER_NAME: "ops-dev.ucsc-cgl.org/kibana"
-      SERVER_BASEPATH: "/kibana"
-      ELASTICSEARCH_URL: "http://${es_service}:9200"
-      XPACK_SECURITY_ENABLED: "false"
-    ports:
-      - 5601
-    networks:
-      - esnet
-      - server
-    links:
-      - "${es_service}"
-    restart: always
-  db:
-    image: postgres:9.6-alpine
-    environment:
-      POSTGRES_PASSWORD: "${postgres_password}"
-      POSTGRES_USER: "${postgres_user}"
-      POSTGRES_DB: "${postgres_db}"
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - action
     restart: always
   login-db:
     image: postgres:9.6-alpine
@@ -242,47 +111,9 @@ services:
     networks:
       - login
     restart: always
-  boardwalk-billing:
-    image: postgres:9.6-alpine
-    container_name: "boardwalk-billing"
-    environment:
-      POSTGRES_PASSWORD: "${billing_password}"
-      POSTGRES_USER: "${billing_user}"
-      POSTGRES_DB: "${billing_db}"
-    volumes:
-      - billing_postgres:/var/lib/postgresql/data
-    ports:
-      - 5432
-    networks:
-      - billing
-    restart: always
-  bdchart-db:
-    image: postgres:9.6-alpine
-    container_name: "bd-chart"
-    environment:
-      POSTGRES_PASSWORD: "${login_password}"
-      POSTGRES_USER: "${login_user}"
-      POSTGRES_DB: "burndown"
-    volumes:
-      - bdchart_postgres:/var/lib/postgresql/data
-    ports:
-      - 5432
-    networks:
-      - bd
-    restart: always
 
 volumes:
-  esdata1:
-    driver: local
-  esdata2:
-    driver: local
-  postgres:
-    driver: local
-  billing_postgres:
-    driver: local
   login_postgres:
-    driver: local
-  bdchart_postgres:
     driver: local
   dashboard1:
     driver: local
@@ -291,15 +122,7 @@ volumes:
 networks:
   core_public:
     external: true
-  esnet:
-    external: true
   server:
     driver: bridge
-  action:
-    driver: bridge
   login:
-    driver: bridge
-  billing:
-    driver: bridge
-  bd:
     driver: bridge
