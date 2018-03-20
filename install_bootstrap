@@ -311,7 +311,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "USER_GROUP":"${user_group}",
 "ES_DOMAIN":"${es_domain}",
 "ES_PORT":"${es_port}",
-"ES_PROTOCOL:"{es_protocol}",
+"ES_PROTOCOL":"${es_protocol}",
 "LOGIN_POSTGRES_USER":"${login_user}",
 "LOGIN_POSTGRES_DB":"${login_db}",
 "LOGIN_POSTGRES_PASSWORD":"${login_password}",
