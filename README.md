@@ -27,7 +27,6 @@ These directions below assume you are using AWS.  We will include additional clo
 
 Make sure you have:
 
-* your AWS key/secret key
 * you know what region you're running in e.g. `us-west-2`
 
 ### Starting an AWS VM
@@ -98,22 +97,10 @@ Once the above setup is done, clone this repository onto your server and run the
 
 The `install_bootstrap` script will ask you to configure each service interactively.
 
-* Consonance
-  * For the question asking "what ethernet device...?" you can find the device using the command `/sbin/ifconfig`. The device to use is the one associated with the private IP address of your AWS VM.
-  * For the question "What cloud environment are you working in?", use _AWS_ for the moment.
-  * For the question "What is the path to the pem key file you will use to authenticate in this environment?", please input the path to your pem key you loaded into the VM from the _Consonance Setup_ section. Use an absolute path.
-  * For the question "What is the name of this key?", type the name of the key that from the question above. Make sure you ommit the suffix (e.g. if the key was _mykey.pem_, you would enter _mykey_).
-  * For question "What is your Security Group?", type the name of the security group that was configured for your VM (On the AWS console, you can find it by clicking on your instance. Then under _Description_, look at _Security groups_).
-  * For question "What is your AWS max spot price?", choose the maximum spot price you are willing to pay per instance per hour for instances spawn by consonance. For more information, see [here](https://aws.amazon.com/ec2/spot/pricing/).
-  * For question "What is your AWS region (e.g. us-east-1 for Virginia)?", type the region for your instance. You can check the code for the region you are using [here](http://docs.aws.amazon.com/general/latest/gr/rande.html#ecr_region).
-  * For question "What is your AWS zone within the selected region (e.g. us-east-1c for the us-east-1 region)?", you can check your AWS zone by clicking on your instance, and then under _Description_, look for _Availability zone_.
-  * For question "What is your AWS instance type (e.g. m1.xlarge)?", type the type of instance you want consonance to spawn up. You can check the types of instances [here](http://www.ec2instances.info/) (use the entry under the _API Name_ column). For now, only use `c4.8xlarge`. Support for more instances will come in the future.  
-  * For question "What is your AWS image ..." use the _AMI ID_ created during the _Consonance Setup_ section.
 * Boardwalk
   * Install in prod mode
   * On question `What is your Google Client ID?`, put your Google Client ID. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
   * On question `What is your Google Client Secret?`, put your Google Client Secret. See [here](http://bitwiser.in/2015/09/09/add-google-login-in-flask.html#creating-a-google-project)
-  * On question `What is the AWS profile?`, your AWS username
 * Common
   * Installing in `dev`mode will use letsencrypt's staging service, which won't exhaust your certificate's limit, but will install fake ssl certificates. `prod` mode will install official SSL certificates.  
   
