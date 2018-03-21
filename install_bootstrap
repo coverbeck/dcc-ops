@@ -279,12 +279,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 
        dcc_invoicing_service=$dcc_dashboard_host
 
-#      dcc_letsencrypt_staging='dcc_letsencrypt_staging'
-#      ask_question "If you would like to add any additional flags to the Let's Encrypt image, such as --staging put the tags here." "$DCC_LETSENCRYPT_STAGING" "DCC Lets Encrypt tags" $dcc_letsencrypt_staging
-
-      # this should move to the COMMON section
-#      dcc_letsencrypt_email='dcc_letsencrypt_email'
-#      ask_question "What is the email to be associated with the letsencrypt certificates?" "$DCC_LETSENCRYPT_EMAIL" "DCC Lets Encrypt Email" $dcc_letsencrypt_email
+      dos_dss_service='dos_dss_service'
+      ask_question "What is the domain of the dos-dss server?" "$DOS_DSS_SERVICE" "DOS DSS Service" $dos_dss_service
 
       #user_group='user_group'
       #ask_question "What is the user and group that should own the files from the metadata-indexer? (Your current USER:GROUP is $(stat -c '%u:%g' $HOME))" "$USER_GROUP" "User Group" $user_group
@@ -328,7 +324,8 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "DCC_CORE_CLIENT_VERSION":"${core_client_version}",
 "FC_LAMBDA_PROTOCOL":"${fc_lambda_protocol}",
 "FC_LAMBDA_DOMAIN":"${fc_lambda_domain}",
-"FC_LAMBDA_PORT":"${fc_lambda_port}"
+"FC_LAMBDA_PORT":"${fc_lambda_port}",
+"DOS_DSS_SERVICE":"${dos_dss_service}"
 }
 CONFIG
       # template out stuff
