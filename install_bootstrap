@@ -256,6 +256,13 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       google_client_secret='google_client_secret'
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
 
+      fc_lambda_protocol='https'
+      fc_lambda_port='443'
+
+      fc_lambda_domain='fc_lambda_domain'
+      ask_questions "What is the domain of the bagit-firecloud-lambda?" "$FC_LAMBDA_DOMAIN" "FireCloud Bagit Lambda Domain" $fc_lambda_domain
+
+
 #      dcc_dashboard_port='dcc_dashboard_port'
 #      ask_question "What is your DCC Dashboard Port?" "$DCC_DASHBOARD_PORT" "DCC Dashboard Port" $dcc_dashboard_port
 
@@ -315,6 +322,9 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 "LOG_IN_TOKEN":"${login_token}",
 "SERVER_NAME":"${dcc_dashboard_host}",
 "DCC_CORE_CLIENT_VERSION":"${core_client_version}",
+"FC_LAMBDA_PROTOCOL":"${fc_lambda_protocol}",
+"FC_LAMBDA_DOMAIN":"${fc_lambda_domain}",
+"FC_LAMBDA_PORT":"${fc_lambda_port}",
 "DOS_DSS_SERVICE":"${dos_dss_service}"
 }
 CONFIG
