@@ -14,6 +14,7 @@ services:
       ES_DOMAIN: "${es_domain}"
       ES_PORT: "${es_port}"
       ES_PROTOCOL: "${es_protocol}"
+      DOS_DSS_SERVICE: "${dos_dss_service}"
     #image: quay.io/ucsc_cgl/dashboard-service:1.0.0
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
