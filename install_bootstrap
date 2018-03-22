@@ -256,12 +256,14 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
       google_client_secret='google_client_secret'
       ask_question "What is your Google Client Secret?" "$GOOGLE_CLIENT_SECRET" "Google Client Secret" $google_client_secret
 
+      google_site_verification_code='google_site_verification_code'
+      ask_question "What is your Google site verification code, something like tk74JOp1VBqdRQVTirM8WKpa1VIYW_vwxfoJo53inH8?" "$GOOGLE_SITE_VERIFICATION_CODE" "Google Site Verification Code" $google_site_verification_code
+
       fc_lambda_protocol='https'
       fc_lambda_port='443'
 
       fc_lambda_domain='fc_lambda_domain'
       ask_questions "What is the domain of the bagit-firecloud-lambda?" "$FC_LAMBDA_DOMAIN" "FireCloud Bagit Lambda Domain" $fc_lambda_domain
-
 
 #      dcc_dashboard_port='dcc_dashboard_port'
 #      ask_question "What is your DCC Dashboard Port?" "$DCC_DASHBOARD_PORT" "DCC Dashboard Port" $dcc_dashboard_port
@@ -306,6 +308,7 @@ while [[ "${run_boardwalk^^}" != 'Y' &&  "${run_boardwalk^^}" != 'N' ]] ; do
 {
 "GOOGLE_CLIENT_ID":"${google_client_id}",
 "GOOGLE_CLIENT_SECRET":"${google_client_secret}",
+"GOOGLE_SITE_VERIFICATION_CODE":"${google_site_verification_code}",
 "DCC_DASHBOARD_HOST":"${dcc_dashboard_host}",
 "DCC_DASHBOARD_PROTOCOL":"${dcc_dashboard_protocol}",
 "DCC_DASHBOARD_SERVICE":"${dcc_dashboard_service}",
