@@ -4,13 +4,12 @@ services:
   dcc-dashboard-service:
     environment:
       APACHE_PATH: "${apache_path}"
-      ES_SERVICE: "${es_service}"
       DATABASE_URL: "${database_url}"
+      FLASK_APP: "/app/mapi.py"
+      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       L_POSTGRES_USER: "${login_user}"
       L_POSTGRES_PASSWORD: "${login_password}"
       L_POSTGRES_DB: "${login_db}"
-      FLASK_APP: "/app/mapi.py"
-      DCC_DASHBOARD_HOST: "${dcc_dashboard_host}"
       SECRET_KEY: "${secret_key}"
       ES_DOMAIN: "${es_domain}"
       ES_PORT: "${es_port}"
@@ -19,7 +18,7 @@ services:
       FC_LAMBDA_DOMAIN: "${fc_lambda_domain}"
       FC_LAMBDA_PORT: "${fc_lambda_port}"
       DOS_DSS_SERVICE: "${dos_dss_service}"
-    image: quay.io/ucsc_cgl/dashboard-service:1.0.9
+    image: quay.io/ucsc_cgl/commons-dashboard-service:commons-0.1.0-beta
     volumes:
       - ~/dcc-dashboard-service/logs:/app/log
     #build: dcc-dashboard-service
@@ -35,7 +34,7 @@ services:
       - login-db
     restart: always
   dcc-dashboard:
-    image: quay.io/ucsc_cgl/dashboard:1.0.9
+    image: quay.io/ucsc_cgl/commons-dashboard:commons-0.1.0-beta
     #build: dcc-dashboard
     ports:
       - "80"
@@ -57,10 +56,9 @@ services:
       LOG_IN_TOKEN: "${login_token}"
       SERVER_NAME: "${dcc_dashboard_host}"
       DCC_CORE_CLIENT_VERSION: "${core_client_version}"
-      ES_SERVICE: "${es_service}"
-      ES_SERVICE: "${es_service}"
       ES_DOMAIN: "${es_domain}"
       ES_PORT: "${es_port}"
+      ES_PROTOCOL: "${es_protocol}"
     networks:
       - server
       - login
@@ -88,7 +86,7 @@ services:
       - server
     restart: always
   boardwalk:
-    image: quay.io/ucsc_cgl/boardwalk:1.0.0
+    image: quay.io/ucsc_cgl/commons-boardwalk:commons-0.1.0-beta
     environment:
       - BOARDWALK_HOST=${dcc_dashboard_host}
       - BW_DATA_URL=${dcc_dashboard_protocol}://${dcc_dashboard_host}
@@ -116,8 +114,6 @@ services:
     restart: always
 
 volumes:
-  postgres:
-    driver: local
   login_postgres:
     driver: local
   dashboard1:
@@ -131,3 +127,4 @@ networks:
     driver: bridge
   login:
     driver: bridge
+
